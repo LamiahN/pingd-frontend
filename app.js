@@ -115,7 +115,7 @@ var UGproject = new Vue({
             }
         
             // if all checks pass proceed with signup
-            const res = await fetch('http://localhost:3000/signup', {
+            const res = await fetch('https://pingd-backend.onrender.com/signup', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(this.signup)
@@ -136,7 +136,7 @@ var UGproject = new Vue({
                 return;
             }
 
-            const res = await fetch('http://localhost:3000/login', {
+            const res = await fetch('https://pingd-backend.onrender.com/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(this.login)
@@ -208,7 +208,7 @@ var UGproject = new Vue({
         async joinDineInQueue(restaurantId) { // separate function for joining dine-in queue with party size input and validation
             try {
 
-                const queueRes = await fetch('http://localhost:3000/getOrCreateQueue', { // first get or create the queue for this restaurant 
+                const queueRes = await fetch('https://pingd-backend.onrender.com/getOrCreateQueue', { // first get or create the queue for this restaurant 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -220,7 +220,7 @@ var UGproject = new Vue({
                 const queue = await queueRes.json(); // get the queue data from response
                 console.log("Queue retrieved:", queue);
         
-                const res = await fetch('http://localhost:3000/addToQueue', { // add user to that queue with party size and code
+                const res = await fetch('https://pingd-backend.onrender.com/addToQueue', { // add user to that queue with party size and code
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -261,7 +261,7 @@ var UGproject = new Vue({
         
                 this.partySize = 1;
         
-                const queueRes = await fetch('http://localhost:3000/getOrCreateQueue', { // first get or create the queue for this restaurant
+                const queueRes = await fetch('https://pingd-backend.onrender.com/getOrCreateQueue', { // first get or create the queue for this restaurant
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -273,7 +273,7 @@ var UGproject = new Vue({
                 const queue = await queueRes.json(); // get the queue data from response
                 console.log("Takeaway Queue:", queue);
         
-                const res = await fetch('http://localhost:3000/addToQueue', {
+                const res = await fetch('https://pingd-backend.onrender.com/addToQueue', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -308,7 +308,7 @@ var UGproject = new Vue({
         
         async getQueueSummary(restaurantId) {
             try {
-                const res = await fetch(`http://localhost:3000/queueSummary/${restaurantId}`);
+                const res = await fetch(`https://pingd-backend.onrender.com/queueSummary/${restaurantId}`);
                 const data = await res.json();
         
                 return data;
@@ -320,7 +320,7 @@ var UGproject = new Vue({
         },
         async getQueueStatus() {
             try {
-                const response = await fetch(`http://localhost:3000/getQueueEntry/${this.currentUser._id}`);
+                const response = await fetch(`https://pingd-backend.onrender.com/getQueueEntry/${this.currentUser._id}`);
                 const data = await response.json(); 
         
                 // if user is in queue, show position and status, otherwise show not in queue
@@ -348,7 +348,7 @@ var UGproject = new Vue({
             this.isFetchingQueues = true; // set flag show fetch in progress
         
             try {
-                const res = await fetch(`http://localhost:3000/userQueues/${this.currentUser._id}`);
+                const res = await fetch(`https://pingd-backend.onrender.com/userQueues/${this.currentUser._id}`);
                 const data = await res.json();
         
                 this.userQueues = data; // store in app state 
@@ -379,10 +379,10 @@ var UGproject = new Vue({
         
                 const queue = this.userQueues.find(q => q.queueId === queueId);
         
-                let endpoint = 'http://localhost:3000/leaveQueue'; // default for dine-in
+                let endpoint = 'https://pingd-backend.onrender.com/leaveQueue'; // default for dine-in
         
                 if (queue && queue.queueType === "takeaway") { // if takeaway queue, use the takeaway endpoint
-                    endpoint = 'http://localhost:3000/leaveTakeawayQueue';
+                    endpoint = 'https://pingd-backend.onrender.com/leaveTakeawayQueue';
                 }
         
                 const response = await fetch(endpoint, { // pass the correct endpoint based on queue type
@@ -409,7 +409,7 @@ var UGproject = new Vue({
 
         async acceptTable(queueId) { // user accepts table when notified, update status in backend, refresh data to update UI and show new status
             try {
-                const response = await fetch('http://localhost:3000/acceptTable', {
+                const response = await fetch('https://pingd-backend.onrender.com/acceptTable', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -465,7 +465,7 @@ var UGproject = new Vue({
         
         async waitLonger(queueId) {
             try {
-                const response = await fetch('http://localhost:3000/waitLonger', {
+                const response = await fetch('https://pingd-backend.onrender.com/waitLonger', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -502,7 +502,7 @@ var UGproject = new Vue({
         
         async forfeitTable(queueId) {
             try {
-                await fetch('http://localhost:3000/forfeit', {
+                await fetch('https://pingd-backend.onrender.com/forfeit', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -524,7 +524,7 @@ var UGproject = new Vue({
         // fetch dine-in restaurants to display UI
         async fetchDineInRestaurants() {
             try {
-                const response = await fetch('http://localhost:3000/restaurants/dinein');
+                const response = await fetch('https://pingd-backend.onrender.com/restaurants/dinein');
                 const data = await response.json();
                 this.restaurants = data;
 
@@ -539,7 +539,7 @@ var UGproject = new Vue({
 
         async fetchTakeawayRestaurants() {
             try {
-                const res = await fetch('http://localhost:3000/takeawayWithQueue');
+                const res = await fetch('https://pingd-backend.onrender.com/takeawayWithQueue');
                 const data = await res.json();
         
                 this.takeawayRestaurants = data.map(r => {
@@ -570,7 +570,7 @@ var UGproject = new Vue({
             alert("Your order is ready! Please proceed to the counter to collect it.");
         
             try {
-                await fetch('http://localhost:3000/leaveTakeawayQueue', { 
+                await fetch('https://pingd-backend.onrender.com/leaveTakeawayQueue', { 
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -604,15 +604,15 @@ var UGproject = new Vue({
             try {
 
                 // menu
-                const res = await fetch(`http://localhost:3000/menu/${id}`);
+                const res = await fetch(`https://pingd-backend.onrender.com/menu/${id}`);
                 this.menuItems = await res.json();
         
                 // trending
-                const trendRes = await fetch(`http://localhost:3000/menu/${id}/trending`);
+                const trendRes = await fetch(`https://pingd-backend.onrender.com/menu/${id}/trending`);
                 this.trendingItems = await trendRes.json();
         
                 // recommendations
-                const recRes = await fetch(`http://localhost:3000/recommendations/restaurants/${id}`);
+                const recRes = await fetch(`https://pingd-backend.onrender.com/recommendations/restaurants/${id}`);
                 this.recommendedRestaurants = await recRes.json();
         
             } catch (error) {
@@ -770,7 +770,7 @@ var UGproject = new Vue({
         },
 
         getTakeawayCuisineImage(categories) { // map cuisine types to images for takeaway section 
-            if (!categories) return 'http://localhost:3000/static/images/other.png';
+            if (!categories) return 'https://pingd-backend.onrender.com/static/images/other.png';
         
             const type = Array.isArray(categories) ? categories[0] : categories;
         
@@ -813,7 +813,7 @@ var UGproject = new Vue({
         
             const mapped = map[key] || 'other';
         
-            return `http://localhost:3000/static/images/${mapped}.png`;
+            return `https://pingd-backend.onrender.com/static/images/${mapped}.png`;
         },
 
         getDashboardCuisineImage(q) { // helper function to get cuisine image for a queue 
@@ -825,7 +825,7 @@ var UGproject = new Vue({
             }
 
             if(!categories) { // if still no categories, return default image
-                return 'http://localhost:3000/static/images/other.png';
+                return 'https://pingd-backend.onrender.com/static/images/other.png';
             }
 
             return q.queueType === 'takeaway' // if takeaway queue, use the takeaway cuisine image mapping 
@@ -835,18 +835,18 @@ var UGproject = new Vue({
 
         getCuisineImage(cuisine) { // helper function to return cuisine image based on cuisine type
             const images = {
-                "Indian": "http://localhost:3000/static/images/indian.png",
-                "Cafe": "http://localhost:3000/static/images/cafe.png",
-                "Japanese": "http://localhost:3000/static/images/japanese.png",
-                "American": "http://localhost:3000/static/images/american.png",
-                "Middle Eastern": "http://localhost:3000/static/images/middleeastern.png",
-                "Italian": "http://localhost:3000/static/images/italian.png",
-                "Mexican": "http://localhost:3000/static/images/mexican.png",
-                "Chinese": "http://localhost:3000/static/images/chinese.png",
-                "Thai": "http://localhost:3000/static/images/thai.png",
-                "Bakery": "http://localhost:3000/static/images/bakery.png",
-                "Seafood": "http://localhost:3000/static/images/seafood.png",
-                "Other": "http://localhost:3000/static/images/other.png"
+                "Indian": "https://pingd-backend.onrender.com/static/images/indian.png",
+                "Cafe": "https://pingd-backend.onrender.com/static/images/cafe.png",
+                "Japanese": "https://pingd-backend.onrender.com/static/images/japanese.png",
+                "American": "https://pingd-backend.onrender.com/static/images/american.png",
+                "Middle Eastern": "https://pingd-backend.onrender.com/static/images/middleeastern.png",
+                "Italian": "https://pingd-backend.onrender.com/static/images/italian.png",
+                "Mexican": "https://pingd-backend.onrender.com/static/images/mexican.png",
+                "Chinese": "https://pingd-backend.onrender.com/static/images/chinese.png",
+                "Thai": "https://pingd-backend.onrender.com/static/images/thai.png",
+                "Bakery": "https://pingd-backend.onrender.com/static/images/bakery.png",
+                "Seafood": "https://pingd-backend.onrender.com/static/images/seafood.png",
+                "Other": "https://pingd-backend.onrender.com/static/images/other.png"
             };
         
             return images[cuisine] || "/static/images/other.png"; // return default image if cuisine type not recognized
@@ -854,21 +854,21 @@ var UGproject = new Vue({
 
         getCuisineBanner(cuisine) { // similar to above but for banner images in restaurant detail view 
             const banners = {
-                "Indian": "http://localhost:3000/static/images/indian_banner.png",
-                "Cafe": "http://localhost:3000/static/images/cafe_banner.png",
-                "Japanese": "http://localhost:3000/static/images/japanese_banner.png",
-                "American": "http://localhost:3000/static/images/american_banner.png",
-                "Middle Eastern": "http://localhost:3000/static/images/middleeastern_banner.png",
-                "Italian": "http://localhost:3000/static/images/italian_banner.png",
-                "Mexican": "http://localhost:3000/static/images/mexican_banner.png",
-                "Chinese": "http://localhost:3000/static/images/chinese_banner.png",
-                "Thai": "http://localhost:3000/static/images/thai_banner.png",
-                "Bakery": "http://localhost:3000/static/images/bakery_banner.png",
-                "Seafood": "http://localhost:3000/static/images/seafood_banner.png",
-                "Other": "http://localhost:3000/static/images/other_banner.png"
+                "Indian": "https://pingd-backend.onrender.com/static/images/indian_banner.png",
+                "Cafe": "https://pingd-backend.onrender.com/static/images/cafe_banner.png",
+                "Japanese": "https://pingd-backend.onrender.com/static/images/japanese_banner.png",
+                "American": "https://pingd-backend.onrender.com/static/images/american_banner.png",
+                "Middle Eastern": "https://pingd-backend.onrender.com/static/images/middleeastern_banner.png",
+                "Italian": "https://pingd-backend.onrender.com/static/images/italian_banner.png",
+                "Mexican": "https://pingd-backend.onrender.com/static/images/mexican_banner.png",
+                "Chinese": "https://pingd-backend.onrender.com/static/images/chinese_banner.png",
+                "Thai": "https://pingd-backend.onrender.com/static/images/thai_banner.png",
+                "Bakery": "https://pingd-backend.onrender.com/static/images/bakery_banner.png",
+                "Seafood": "https://pingd-backend.onrender.com/static/images/seafood_banner.png",
+                "Other": "https://pingd-backend.onrender.com/static/images/other_banner.png"
             };
         
-            return banners[cuisine] || "http://localhost:3000/static/images/other_banner.png";
+            return banners[cuisine] || "https://pingd-backend.onrender.com/static/images/other_banner.png";
         },
 
         getCuisine(restaurantID) {
@@ -921,7 +921,7 @@ var UGproject = new Vue({
         },
 
         getProfileAvatar() {
-            return 'http://localhost:3000/static/images/default-avatar.png';
+            return 'https://pingd-backend.onrender.com/static/images/default-avatar.png';
         },
 
         toggleFAQ(index) {

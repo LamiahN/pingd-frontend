@@ -18,7 +18,7 @@ var adminApp = new Vue({
         // for admin login, store admin data in app state, move to dashboard view, fetch queues for the restaurant
         async login() {
             try {
-                const res = await fetch('http://localhost:3000/adminLogin', {
+                const res = await fetch('https://pingd-backend.onrender.com/adminLogin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -62,9 +62,9 @@ var adminApp = new Vue({
                 let url;
 
                 if (typeof this.admin.restaurantID === "number") {
-                    url = `http://localhost:3000/adminQueues/${this.admin.restaurantID}`;
+                    url = `https://pingd-backend.onrender.com/adminQueues/${this.admin.restaurantID}`;
                 } else {
-                    url = `http://localhost:3000/adminQueuesTakeaway/${this.admin.restaurantID}`;
+                    url = `https://pingd-backend.onrender.com/adminQueuesTakeaway/${this.admin.restaurantID}`;
                 }
 
                 const res = await fetch(url);
@@ -85,7 +85,7 @@ var adminApp = new Vue({
         // fetch entries for a specific queue and store in queueEntries
         async fetchEntries(queueId) {
             try {
-                const res = await fetch(`http://localhost:3000/queueEntries/${queueId}`);
+                const res = await fetch(`https://pingd-backend.onrender.com/queueEntries/${queueId}`);
                 const data = await res.json();
         
                 this.$set(this.queueEntries, queueId, data);
@@ -114,7 +114,7 @@ var adminApp = new Vue({
         // mark a user as ready, notify them, refresh the queue entries
         async setReady(userId, queueId) {
             try {
-                await fetch('http://localhost:3000/notifyCustomer', {
+                await fetch('https://pingd-backend.onrender.com/notifyCustomer', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -134,7 +134,7 @@ var adminApp = new Vue({
         // remove a user from the dine-in queue, refresh the queue entries, if takeaway: also refresh the queues ( to update the admin view)
         async removeUser(userId, queueId) {
             try {
-                await fetch('http://localhost:3000/leaveQueue', {
+                await fetch('https://pingd-backend.onrender.com/leaveQueue', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -154,7 +154,7 @@ var adminApp = new Vue({
         // remove a user from the takeaway queue, refresh the queue entries, refresh the queues ( to update the admin view)
         async removeTakeawayUser(userId, queueId) {
             try {
-                const res = await fetch('http://localhost:3000/leaveTakeawayQueue', {
+                const res = await fetch('https://pingd-backend.onrender.com/leaveTakeawayQueue', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -187,7 +187,7 @@ var adminApp = new Vue({
         // fetch a customer's full name by their userId, used to display customer names in the queue entries
         async fetchUserName(userId) {
             try {
-                const res = await fetch(`http://localhost:3000/user/${userId}`);
+                const res = await fetch(`https://pingd-backend.onrender.com/user/${userId}`);
                 const data = await res.json();
         
                 return data.fullName;
