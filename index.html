@@ -624,6 +624,39 @@
                     
                     </div>
 
+                    <!-- leave queue btn for dine-in -->
+                    <div v-if="selectedQueue.status === 'waiting'" style="margin-top: 20px;" class="secondary-actions">
+                        <button @click="leaveQueue(selectedQueue.queueId)" class="danger-btn">
+                            Leave Queue
+                        </button>
+                    </div>
+
+                    <!-- ready state buttons (dine-in) -->
+                    <div v-if="selectedQueue.status === 'ready'" class="qd-actions">
+
+                        <button class="primary-btn" @click="acceptTable(selectedQueue.queueId)">
+                            Accept Table
+                        </button>
+                    
+                        <div class="secondary-actions">
+                            <button class="secondary-btn" @click="waitLonger(selectedQueue.queueId)">
+                                Wait Longer
+                            </button>
+                    
+                            <button class="danger-btn" @click="forfeitTable(selectedQueue.queueId)">
+                                Forfeit
+                            </button>
+                        </div>
+                    
+                    </div>
+
+                    <!-- show leave button if status is delayed -->
+                    <div v-if="selectedQueue.status === 'delayed'" style="margin-top: 20px;" class="secondary-actions">
+                        <button @click="leaveQueue(selectedQueue.queueId)" class="danger-btn">
+                            Leave Queue
+                        </button>
+                    </div>
+
                     <!-- need to add queue handling btns here before displaying menu -->
 
                     <div class="qd-loved-header">

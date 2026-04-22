@@ -1188,6 +1188,51 @@ button:hover {
     font-weight: 600;
 }
 
+/* Queue Action Buttons */
+
+.qd-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.primary-btn {
+    background: var(--primary-green);
+    color: white;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    width: 100%;
+}
+
+.secondary-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.secondary-btn {
+    flex: 1;
+    background: #ffe1b3;
+    color: #ff9a02;
+    color: var(--text-dark);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.danger-btn {
+    flex: 1;
+    background: #FFE5E5;
+    color: #D32F2F;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 13px;
+}
+
 .qd-circle-container {
     display: flex;
     justify-content: center;
