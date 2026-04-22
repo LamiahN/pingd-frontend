@@ -1001,14 +1001,14 @@ var UGproject = new Vue({
         },
 
         trendingRestaurants() { // get top 5 dine-in restaurants with longest queues for trending section on homepage
-            return (this.restaurants || [])
+            return (this.restaurants || []) 
                 .map(r => ({
                     ...r,
-                    queueLength: this.queueSummaries[r.restaurant_id]?.queueLength || 0,
+                    queueLength: this.queueSummaries[r.restaurant_id]?.queueLength || 0, 
                     estimatedWaitTime: this.queueSummaries[r.restaurant_id]?.estimatedWaitTime || 0
                 }))
                 .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-                .slice(0, 5);
+                .slice(0, 5); 
         },
 
         recentRestaurants() { // get top 5 restaurants the user is currently in queue for to show on dashboard
