@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Pingd</title>
+        <link rel="stylesheet" href="styles.css">
+
+        <!-- Vue.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script> 
+        <!-- Font Awesome CDN for icons-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"> 
+        <!-- links for google fonts-->
+        <link rel="preconnect" href="https://fonts.googleapis.com"> 
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
+    </head>
+    
+    <body>
+        <div id="app">
+
+            <!-- SIGN UP -->
+            <div v-if="mode === 'signup'" class="auth-page">
+
+                <div class="auth-container">
+                    <!-- Logo -->
+                    <div class="auth-logo">
+                        <img src="http://localhost:3000/static/images/logo2.png" alt="Logo" />
+                    </div>
+
+                    <div class="auth-card">
+
+                        <!-- Tabs (login or signup) -->
+                        <div class="auth-tabs">
+                            <button @click="mode = 'login'">Login</button>
+                            <button class="active-tab">Sign Up</button>
+                        </div>
+                        <!-- Inputs -->
+                        <input v-model="signup.fullName" placeholder="Full Name" />
+                        <input v-model="signup.email" placeholder="Email Address" />
+                        <input v-model="signup.password" type="password" placeholder="Password" />
+                        <input v-model="signup.dob" type="date" />
+
+                        <button @click="signupUser" class="auth-btn">
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- LOGIN -->
+            <div v-if="mode === 'login'" class="auth-page">
+
+                <div class="auth-container">
+
+                    <!-- floating logo-->
+                    <div class="auth-logo">
+                        <img src="http://localhost:3000/static/images/logo2.png" alt="Logo" />
+                    </div>
+
+                    <div class="auth-card">
+                        <!-- Toggle buttons-->
+                        <div class="auth-tabs">
+                            <button @click="mode = 'login'" class="active-tab">Login</button>
+                            <button @click="mode = 'signup'">Sign Up</button>
+                        </div>
+    
+                        <!-- Inputs -->
+                        <input v-model="login.email" placeholder="Email Address" />
+                        <input v-model="login.password" type="password" placeholder="Password" />
+    
+                        <p class="forgot">Forgot Password?</p>
+    
+                        <button @click="loginUser" class="auth-btn">Login</button>
+    
+                    </div>
+
+                </div>
+                
+            </div>
+        
+            <!-- MESSAGE --> <!-- change to pop up -->
+            <p>{{ message }}</p>
+
+            <!-- HOME SCREEN/ DASHBOARD--> 
+            <div v-if="mode === 'home'">
+
+                <div class="dashboard-header">
+
+                    <div class="header-content" 
+                        style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: flex-start;
+                            padding: 0 20px;
+                            gap: 12px;
+                        ">
+
+                        <img 
+                            :src="getProfileAvatar()" 
+                            style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"
+                        />
+
+                        <div>
+                            <h2 style="margin: 0; font-size: 20px; opacity: 0.9;">
+                                Welcome back,
+                            </h2>
+                            <h2 style="margin: 0; font-size: 20px;">
+                                {{ currentUser.fullName }}
+                            </h2>
+                        </div>
+
+                    </div>
+                
+                </div>
+
+                <!-- Logout button -->
+                <button @click="logout" style="position: absolute; top: 10px; right: 10px;">Logout</button> 
+
+                <div class = "main-content">
+                    <div class ="welcome-section">
+                        <h2>Discover restaurants, join queues and get real-time updates on wait times, all in one place!</h2>
+                        <p>Start by browsing nearby restaurants or check out your recent activity below.</p>
+                    </div>
+    
+                    <div class="section">
+                        <!-- Trending restaurants nearby -->
+                        <h3>Trending spots nearby</h3>
+                        <div class="horizontal-scroll">
+    
+                            <div v-for="r in trendingRestaurants" :key="r.restaurant_id" class="card">
+
+                                <div class="card-top">
+
+                                    <!-- img placeholder -->
+                                    <img :src="getCuisineImage(r.categories)" class="restaurant-img"/>
+                            
+                                    <div class="card-header">
+                                        <h4>{{ r.brand_name }}</h4>
+                            
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            <span>{{ r.rating ? r.rating : 'Not rated' }}</span>
+                                        </div>
+                                    </div>
+                            
+                                </div>
+
+                                <div class="card-info">
+                                    <p class="fas fa-users"> {{ r.queueLength }} people in queue</p>
+                                    <p class="fas fa-clock"> {{ r.estimatedWaitTime }} mins</p>
+                                </div>
+                                
+                                <button @click="joinQueuePrompt(r.restaurant_id, 'dine-in')">
+                                    Join Queue
+                                </button>
+    
+                            </div>
+    
+                        </div>
+                    </div>    
+    
+                    <div class="section">
+                    <!-- User's recent restaurants -->
+                        <h3>My recent restaurants</h3>
+                        <div v-if="recentRestaurants.length">
+    
+                            <div class="horizontal-scroll">
+    
+                                <div v-for="q in recentRestaurants" :key="q.queueId" class="card">
+
+                                    <div class="card-top">
+                                        <img 
+                                            :src="getDashboardCuisineImage(q)" 
+                                            @error="e => e.target.src='http://localhost:3000/static/images/other.png'"
+                                            class="restaurant-img"
+                                        />
+                                        
+                                        <div class="card-header">
+                                            <h4>{{ q.restaurantName }}</h4>
+                                
+                                            <div class="queue-type">
+                                                {{ q.queueType === 'takeaway' ? '🥡' : '🍽' }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-info">
+                                        <span class="fas fa-users"> You are position {{ q.position }} in queue</span>
+                                    </div>
+    
+                                    <button @click="openQueue(q)">
+                                        View Queue
+                                    </button>
+    
+                                </div>
+    
+                            </div>
+    
+                        </div>
+                        <p v-else>No recent restaurants yet</p>
+                    </div>    
+    
+                    <div class="section">
+                        <!-- User's favourite dishes -->
+                        <h3>Recommended for you</h3>
+                        <div v-if="recommendedDishes.length">
+    
+                            <div class="horizontal-scroll">
+    
+                                <div v-for="item in recommendedDishes" :key="item._id" class="card">
+
+                                    <div class="card-header">
+                                        <h4>{{ item.item_name }}</h4>
+                            
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            <span>Best dish!</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-info">
+
+                                        <p v-if="item.restaurant_name">
+                                            {{ item.restaurant_name }}
+                                        </p>
+
+                                        <p>{{ item.description }}</p>
+                                        <p>AED {{ item.price }}</p>
+                                    </div>
+    
+                                    <button @click="viewRestaurantByDish(item)">
+                                        View Restaurant
+                                    </button>
+    
+                                </div>
+    
+                            </div>
+    
+                        </div>
+                        <p v-else>No recommended dishes yet. Interact with restaurants first.</p>
+                    </div>    
+                </div>
+                
+
+            </div>
+
+            <!-- MY QUEUE SCREEN -->
+            <div v-if="mode === 'myQueue'" class="myqueue-page">
+
+                <div class="page-header">
+                    <h2>My Queue Sessions</h2>
+                    <button @click="mode = 'home'">Back</button>
+                </div>
+            
+                <!-- No queues -->
+                <div v-if="userQueues.length === 0" class="empty-state">
+                    <p>You are not currently in any queues.</p>
+                    <button @click="mode = 'browse'">Browse Restaurants</button>
+                </div>
+            
+                <!-- Active queues -->
+                <div v-else class="queue-list">
+            
+                    <div v-for="q in userQueues" :key="q.queueId" class="queue-card">
+
+                        <div class="queue-main">
+                    
+                            <!-- image of left -->
+                            <img :src="getDashboardCuisineImage(q)" class="restaurant-img"/>
+                    
+                            <!-- info on right -->
+                            <div class="queue-details">
+                    
+                                <div class="title-row">
+                                    <h4>{{ q.restaurantName }}</h4>
+                    
+                                    <div class="title-right">
+
+                                        <span class="status-pill" :class="getStatusClass(q.status)">
+                                            {{ q.status }}
+                                        </span>
+                                
+                                        <span class="queue-type">
+                                            {{ q.queueType === 'takeaway' ? '🥡' : '🍽' }}
+                                        </span>
+                                
+                                    </div>
+                                </div>
+                    
+                                <p class="queue-position">
+                                    Position #{{ q.position }}
+                                </p>
+                    
+                                <p class="queue-wait">
+                                    ~{{ q.estimatedWaitTime }} mins 
+                                    <span class="countdown">
+                                        ({{ getRemainingTime(q) }} mins left)
+                                    </span>
+                                </p>
+                    
+                            </div>
+                    
+                        </div>
+                    
+                        <!-- Bottom row -->
+                        <div class="queue-bottom">
+                            <button class="view-btn" @click="openQueue(q)">
+                                View Queue
+                            </button>
+                        </div>
+                    
+                    </div>
+            
+                </div>
+            
+            </div>
+
+
+            <!-- BROWSE RESTAURANTS (dine-in)-->
+            <div v-if="mode === 'browse'" class="browse-page">
+
+                <!-- Banner -->
+                <div class="browse-banner">
+                    <h2>Browse Dine-In Restaurants</h2>
+                    <p>Browse your favourite restaurants!</p>
+
+                    <!-- Back button -->
+                    <button @click="mode = 'home'" style="position: absolute; top: 10px; right: 10px;" >Back</button>
+                </div>
+
+                <!-- search bar -->
+                <div class="search-container">
+
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            v-model="searchTerm" 
+                            placeholder="Search restaurants or cuisine..."
+                        >
+                    </div>
+
+                </div>
+
+                <!-- filtering chips -->
+                <div class="filter-chips">
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: activeFilter === 'all' }"
+                        @click="setFilter('all')"
+                    >
+                        All
+                    </div>
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: activeFilter === 'waitTime' }"
+                        @click="setFilter('waitTime')"
+                    >
+                        Shortest Wait
+                    </div>
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: activeFilter === 'rating' }"
+                        @click="setFilter('rating')"
+                    >
+                        Top Rated
+                    </div>
+
+                </div>
+
+                <!-- cuisine chips -->
+                <div class="cuisine-chips">
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: selectedCuisine === '' }"
+                        @click="selectedCuisine = ''"
+                    >
+                        All
+                    </div>
+
+                    <div 
+                        v-for="c in cuisines" 
+                        :key="c"
+                        class="chip"
+                        :class="{ active: selectedCuisine === c }"
+                        @click="selectedCuisine = c"
+                    >
+                        {{ c }}
+                    </div>
+
+                </div>
+
+                <div v-for="restaurant in filteredRestaurants" :key="restaurant._id" class="card">
+
+                    <div class="card-top">
+                
+                        <!-- img -->
+                        <img :src="getCuisineImage(restaurant.categories)" class="restaurant-img"/>
+                
+                        <!-- info -->
+                        <div class="card-header">
+                
+                            <div class="title-row">
+                                <h4>{{ restaurant.brand_name }}</h4>
+                
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>{{ restaurant.rating || 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                
+                    </div>
+                
+                    <!-- info row -->
+                    <div class="card-info">
+                
+                        <p class="cuisine">Cuisine: {{ restaurant.categories }}</p>
+
+                        <span>
+                            <i class="fas fa-users"></i>
+                            {{ queueSummaries[restaurant.restaurant_id]?.queueSize || 0 }} people in queue
+                        </span>
+                
+                        <span>
+                            <i class="fas fa-clock"></i>
+                            {{ queueSummaries[restaurant.restaurant_id]?.estimatedWaitTime || 0 }} mins
+                        </span>
+                
+                    </div>
+                
+                    <!-- Buttons -->
+                    <div class="card-actions">
+                
+                        <button @click="viewRestaurant(restaurant)">
+                            View Menu
+                        </button>
+                
+                        <button @click="joinQueuePrompt(restaurant.restaurant_id, 'dine-in')">
+                            Join Queue
+                        </button>
+                
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- MENU SCREEN (dine-in)-->
+            <div v-if="mode === 'menu'" class="menu-page">
+
+                <div class="menu-banner">
+
+                    <img :src="getCuisineBanner(selectedRestaurant.categories)" class="menu-banner-img"/>
+
+                    <div class="menu-banner-overlay">
+                        <button class="back-btn" @click="mode = 'browse'">←</button>
+                        <h2>{{ selectedRestaurant.brand_name }}</h2>
+                    </div>
+                </div>    
+
+                <!-- Trending Items -->
+                <h3 class="section-title">Trending dishes</h3>
+                <div class="menu-items horizontal-scroll">
+
+                    <div v-for="item in trendingItems" :key="item._id" class="menu-card">
+
+                        <div class="menu-img-wrapper">
+                    
+                            <img :src="getCuisineImage(selectedRestaurant.categories)" class="menu-item-img"/>
+                    
+                            <!-- overlay -->
+                            <span class="tag-overlay">
+                                <i class="fas fa-star"></i> Popular
+                            </span>
+                    
+                        </div>
+                    
+                        <div class="menu-item-info">
+                            <h4>{{ item.item_name }}</h4>
+                            <p class="price">AED {{ item.price }}</p>
+                        </div>
+                    
+                    </div>
+
+                </div>
+
+                <!-- Menu Items -->
+                <h3 class="section-title">Menu</h3>
+                <div class="menu-list">
+
+                    <div v-for="item in menuItems" :key="item._id" class="menu-list-card">
+
+                        <img 
+                            :src="getCuisineImage(selectedRestaurant.categories)" 
+                            class="menu-list-img"
+                        />
+
+                        <div class="menu-list-info">
+                            <h4>{{ item.item_name }}</h4>
+
+                            <p class="menu-desc">Delicious choice from our menu</p>
+
+                            <p class="price">AED {{ item.price }}</p>
+                        </div>
+
+                    </div>
+
+                </div>
+                
+                <!-- Recommended Restaurants -->
+                <h3 class="section-title">Similar restaurants you might also like</h3>
+                <div class="similar-scroll">
+
+                    <div v-for="r in recommendedRestaurants" :key="r.restaurant_id" class="similar-card">
+
+                        <img :src="getCuisineImage(r.categories)" class="similar-img"/>
+
+                        <div class="similar-info">
+
+                            <div class="similar-header">
+                                <h4>{{ r.brand_name }}</h4>
+
+                                <span class="rating-pill">
+                                    <i class="fas fa-star"></i>
+                                    {{ r.rating }}
+                                </span>
+                            </div>
+
+                            <p class="distance">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ r.distance.toFixed(1) }} km from this restaurant
+                            </p>
+
+                        </div>
+
+                        <button class="view-btn" @click="viewRestaurant(r)">
+                            View Menu
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>            
+
+            <!-- SPECIFIC QUEUE DETAIL SCREEN -->
+            <div v-if="mode === 'queueDetail'">
+
+                <div class="qd-banner">
+
+                    <img :src="getDashboardCuisineImage(selectedQueue)" class="qd-banner-img"/>
+
+                    <!-- Overlay -->
+                    <div class="qd-overlay">
+
+                        <div class="qd-top">
+
+                            <button class="qd-back" @click="mode = 'myQueue'">
+                                ←
+                            </button>
+
+                            <div class="qd-rating">
+                                <i class="fas fa-star"></i>
+                                <span>{{ selectedQueue.rating || 'No rating' }}</span>
+                            </div>
+
+                        </div>
+
+                        <!-- Bottom text -->
+                        <div class="qd-text">
+                            <h2>{{ selectedQueue.restaurantName }}</h2>
+                            <p>Session active</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- dine in queue details card progress bar and trending dishes -->
+                <div v-if="selectedQueue.queueType === 'dine-in'" class="qd-loved">
+
+                    <!-- main card -->
+                    <div class="qd-waitlist-card">
+
+                        <p class="qd-label">WAITLIST</p>
+                    
+                        <!-- title should change depending on type -->
+                        <h1>
+                            {{ selectedQueue.queueType === 'dine-in' 
+                                ? 'Table for ' + selectedQueue.partySize 
+                                : 'Order no. ' + selectedQueue.queueId.slice(-4) }}
+                        </h1>
+                    
+                        <div class="qd-row">
+                    
+                            <span>Position #{{ selectedQueue.position }}</span>
+                    
+                            <span>
+                                Time remaining: ~{{ countdownTime }} mins
+                            </span>
+                    
+                        </div>
+                    
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="qd-progress-section">
+
+                        <div class="qd-progress-top">
+                            <span>Progress</span>
+                            <span>{{ countdownTime }} mins remaining</span>
+                        </div>
+                    
+                        <div class="qd-progress-bar">
+                            <div 
+                                class="qd-progress-fill"
+                                :class="selectedQueue.status"
+                                :style="{ width: getProgressWidth(selectedQueue) }"
+                            ></div>
+                        </div>
+                    
+                    </div>
+
+                    <!-- need to add queue handling btns here before displaying menu -->
+
+                    <div class="qd-loved-header">
+                        <h3>Most Loved Dishes</h3>
+                    </div>
+                
+                    <div class="qd-loved-scroll">
+                
+                        <div v-for="item in trendingItems" :key="item._id" class="qd-loved-card">
+                
+                            <img :src="getDashboardCuisineImage(selectedQueue)" class="qd-loved-img"
+                            />
+                
+                            <p class="qd-loved-name">
+                                {{ item.item_name }}
+                            </p>
+                            
+                            <p class="qd-loved-price">
+                                AED {{ item.price }}
+                            </p>
+                
+                        </div>
+                
+                    </div>
+                
+                </div>
+
+                <!-- recommended similar restaurants for dine in-->
+                <div v-if="selectedQueue.queueType === 'dine-in'">
+
+                    <!-- recommended restaurants (not supposed to show for takeaway)-->
+                    <h3 class="section-title" style="padding: 0 20px; margin: 0; font-size: 16px;">Nearby Restaurants</h3>
+
+                    <div class="similar-scroll">
+
+                        <div v-for="r in recommendedRestaurants" :key="r.restaurant_id" class="similar-card">
+
+                            <img 
+                                :src="getCuisineImage(r.categories)" 
+                                class="similar-img"
+                            />
+
+                            <div class="similar-info">
+
+                                <div class="similar-header">
+                                    <h4>{{ r.brand_name }}</h4>
+
+                                    <span class="rating-pill">
+                                        <i class="fas fa-star"></i>
+                                        {{ r.rating }}
+                                    </span>
+                                </div>
+
+                                <p class="distance">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ r.distance ? r.distance.toFixed(1) + ' km away' : '' }}
+                                </p>
+
+                            </div>
+
+                            <button class="view-btn" @click="viewRestaurant(r)">
+                                View Menu
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+                <!-- takeaway specific queue details -->
+                <div v-if="selectedQueue.queueType === 'takeaway'" class="qd-takeaway">
+
+                    <!-- main card -->
+                    <div class="qd-waitlist-card">
+
+                        <p class="qd-label">ORDER STATUS</p>
+                    
+                        <h1>
+                            Queue ID #{{ selectedQueue.queueId.slice(-4) }}
+                        </h1>
+                    
+                        <div class="qd-row">
+                            <span>Position #{{ selectedQueue.position }}</span>
+                            <span>~{{ selectedQueue.estimatedWaitTime }} mins</span>
+                        </div>
+
+                        <!-- Progress bar -->
+                        <div class="qd-circle-container">
+
+                            <div 
+                                class="qd-circle"
+                                :class="selectedQueue.status"
+                            >
+
+                                <!-- show video while preparing -->
+                                <video v-if="selectedQueue.status !== 'ready'" class="qd-video" autoplay muted loop playsinline >
+                                    <source src="http://localhost:3000/static/videos/takeaway-preparing.mp4" type="video/mp4">
+                                </video>
+
+                                <!-- ready state -->
+                                <p v-else>
+                                    Order Ready!
+                                </p>
+
+                            </div>
+                        
+                        </div>
+
+                        <div class="qd-progress-section">
+
+                            <div class="qd-progress-top">
+                                <span>Order Progress</span>
+                                <span>{{ countdownTime }} mins remaining</span>
+                            </div>
+                        
+                            <div class="qd-progress-bar">
+                                <div 
+                                    class="qd-progress-fill"
+                                    :style="{ width: getProgressWidth(selectedQueue) }"
+                                ></div>
+                            </div>
+                        
+                        </div>
+
+                        <div class="qd-action">
+
+                            <!-- not ready -->
+                            <button 
+                                v-if="selectedQueue.status !== 'ready'" 
+                                class="collect-disabled"
+                                disabled
+                            >
+                                Preparing Order...
+                            </button>
+                        
+                            <!-- ready -->
+                            <button 
+                                v-else 
+                                class="collect-btn"
+                                @click="handleTakeawayReady(selectedQueue.queueId)"
+                            >
+                                Order Collected
+                            </button>
+                        
+                        </div>
+                    
+                    </div>
+
+                </div>
+
+            </div>    
+
+
+            <!-- TAKEOUT BROWSE -->
+            <div v-if="mode === 'browseTakeout'" class="browse-page takeaway">
+
+                <div class="browse-banner">
+                    <h2>Browse Takeaway Restaurants</h2>
+                    <p>Order ahead and skip the wait</p>
+
+                    <button @click="mode = 'home'" style="position: absolute; top: 10px; right: 10px;">
+                        Back
+                    </button>
+                </div>
+
+                <!-- search -->
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            v-model="takeawaySearch" 
+                            placeholder="Search takeaway restaurants..."
+                        >
+                    </div>
+                </div>
+
+                <!-- filter chips -->
+                <div class="filter-chips">
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: takeawayFilter === 'all' }"
+                        @click="setTakeawayFilter('all')"
+                    >
+                        All
+                    </div>
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: takeawayFilter === 'waitTime' }"
+                        @click="setTakeawayFilter('waitTime')"
+                    >
+                        Shortest Wait
+                    </div>
+
+                    <div 
+                        class="chip" 
+                        :class="{ active: takeawayFilter === 'rating' }"
+                        @click="setTakeawayFilter('rating')"
+                    >
+                        Top Rated
+                    </div>
+
+                </div>
+
+                <div v-if="filteredTakeawayRestaurants.length === 0">
+                    <p style="padding: 20px;">No restaurants match your search criteria.</p>
+                </div>
+                
+                <!-- new list -->
+                <div v-else>
+                    <div v-for="restaurant in filteredTakeawayRestaurants" 
+                         :key="restaurant.restaurant_id" 
+                         class="card">
+                
+                        <div class="card-top">
+            
+                            <img 
+                                :src="getTakeawayCuisineImage(restaurant.categories)" 
+                                @error="e => e.target.src='http://localhost:3000/static/images/other.png'"
+                                class="restaurant-img"
+                            />
+                
+                            <div class="card-header">
+                
+                                <div class="title-row">
+                                    <h4>{{ restaurant.brand_name }}</h4>
+                
+                                    <div class="rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>{{ restaurant.rating || 'No rating' }}</span>
+                                    </div>
+                                </div>
+                
+                            </div>
+                
+                        </div>
+                
+                        <div class="card-info">
+                
+                            <p class="cuisine">
+                                {{ formatTakeawayCuisine(restaurant.categories) }}
+                            </p>
+                
+                            <span>
+                                <i class="fas fa-users"></i>
+                                {{ restaurant.queueLength }} people in queue
+                            </span>
+                
+                            <span>
+                                <i class="fas fa-clock"></i>
+                                {{ restaurant.estimatedWaitTime }} mins
+                            </span>
+                
+                        </div>
+                
+                        <button @click="joinQueuePrompt(restaurant.cleanId, 'takeaway')">
+                            Join Queue
+                        </button>
+                
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BOTTOM NAVIGATION BAR -->
+            <div class="bottom-nav" v-if="currentUser">
+
+                <div 
+                    class="nav-item" 
+                    :class="{ active: mode === 'home' }"
+                    @click="mode = 'home'">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </div>
+            
+                <div 
+                    class="nav-item" 
+                    :class="{ active: mode === 'browse' }"
+                    @click="showBrowseModal = true">
+                    <i class="fas fa-search"></i>
+                    <span>Browse</span>
+                </div>
+            
+                <!-- CENTER BUTTON -->
+                <div class="scan-btn" @click="mode = 'scanQR'">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+            
+                <div 
+                    class="nav-item" 
+                    :class="{ active: mode === 'myQueue' }"
+                    @click="mode = 'myQueue'">
+                    <i class="fas fa-list"></i>
+                    <span>My Queue</span>
+                </div>
+            
+                <div 
+                    class="nav-item" 
+                    :class="{ active: mode === 'profile' }"
+                    @click="mode = 'profile'">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+            
+            </div>
+
+            <!-- Browse Modal -->
+            <transition name="modal-fade">
+                <div 
+                    v-if="showBrowseModal" 
+                    class="modal-overlay" 
+                    @click.self="showBrowseModal = false"
+                >
+            
+                    <div class="modal">
+            
+                        <h3>What would you like to browse?</h3>
+            
+                        <div class="modal-options">
+            
+                            <div class="option-card" @click="selectBrowse('dine-in')">
+                                🍽
+                                <p>Dine-in</p>
+                            </div>
+            
+                            <div class="option-card" @click="selectBrowse('takeaway')">
+                                🥡
+                                <p>Takeaway</p>
+                            </div>
+            
+                        </div>
+            
+                        <button class="close-btn" @click="showBrowseModal = false">
+                            Cancel
+                        </button>
+            
+                    </div>
+            
+                </div>
+            </transition>
+
+            <!-- PROFILE PAGE -->
+            <div v-if="mode === 'profile'" class="profile-page">
+
+                <div class="profile-header">
+                    <h2>My Profile</h2>
+
+                    <div class="profile-user">
+                        <img 
+                            :src="getProfileAvatar()" 
+                            class="avatar"
+                        />
+                        <p style="color: #4CAF50; font-weight: 600;">{{ currentUser?.email }}</p>
+                    </div>
+                </div>
+            
+                <!-- options -->
+                <div class="profile-options">
+            
+                    <div class="profile-item" @click="mode = 'editProfile'">
+                        <span>Edit my details</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+            
+                    <div class="profile-item" @click="mode = 'preferences'">
+                        <span>My preferences</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+            
+                    <div class="profile-item" @click="mode = 'changePassword'">
+                        <span>Change password</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+            
+                    <div class="profile-item" @click="mode = 'faqs'">
+                        <span>FAQs</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+            
+                </div>
+            
+            </div>
+
+            <!-- FAQ PAGE -->
+            <div v-if="mode === 'faqs'" class="faq-page">
+
+                    <div class="faq-banner">
+
+                        <div class="faq-overlay">
+
+                            <!-- back button -->
+                            <button class="back-btn" @click="mode = 'profile'">
+                                ←
+                            </button>
+
+                            <!-- title -->
+                            <div class="faq-text">
+                                <h2>FAQs</h2>
+                                <p>Frequently asked questions</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+            
+                <!-- FAQ List -->
+                <div class="faq-list">
+            
+                    <div 
+                        v-for="(faq, index) in faqs" 
+                        :key="index" 
+                        class="faq-item"
+                    >
+            
+                        <!-- question -->
+                        <div class="faq-question" @click="toggleFAQ(index)">
+                            <span>{{ faq.question }}</span>
+                            <i class="fas" :class="faq.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </div>
+            
+                        <!-- answer -->
+                        <div v-if="faq.open" class="faq-answer">
+                            {{ faq.answer }}
+                        </div>
+            
+                    </div>
+            
+                </div>
+            
+            </div>
+        
+
+        </div>
+        
+        <script src="app.js"></script>
+
+    </body>
+
+</html>

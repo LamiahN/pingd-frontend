@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Admin Dashboard</title>
+        <link rel="stylesheet" href="admin-styles.css">
+
+        <!-- Vue.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script> 
+
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+    </head>
+    
+    <body>
+
+        <div id="adminApp">
+
+            <!-- LOGIN PAGE -->
+            <div v-if="mode === 'login'" class="admin-login-page">
+
+                <!-- Background shape -->
+                <div class="login-bg-shape"></div>
+            
+                <!-- Card -->
+                <div class="admin-login-container">
+
+                    <div class="admin-login-card">
+                
+                        <!-- Logo -->
+                        <div class="login-logo">
+                            <img src="http://localhost:3000/static/images/logo2.png">
+                        </div>
+                
+                        <input v-model="email" placeholder="Email Address">
+                        <input v-model="password" type="password" placeholder="Password">
+                
+                        <button @click="login">Login</button>
+                
+                    </div>
+                
+                </div>
+                    
+            </div>
+
+            <!-- DASHBOARD -->
+            <div v-if="mode === 'dashboard'">
+
+                <div class="admin-header">
+                    <button class="logout-btn" @click="logout">Logout</button>
+
+                    <h2>Admin Dashboard</h2>
+                    <p>Restaurant ID: {{ admin.restaurantID }}</p>
+                </div>
+
+                <div class="admin-container">
+
+                    <h3>Your Queues</h3>
+
+                    <div v-for="q in queues" :key="q._id" class="queue-card">
+
+                        <!-- Queue header -->
+                        <div class="queue-header">
+                            <h4>
+                                {{ q.queueType === 'takeaway' ? '🥡 Takeaway Queue' : '🍽️ Dine-In Queue' }}
+                            </h4>
+                            <p>Queue Code: {{ q.queueCode }}</p>
+                        </div>
+
+                        <!-- Users in queue -->
+                        <div v-if="queueEntries[q._id]">
+
+                            <div 
+                                v-for="entry in queueEntries[q._id]" 
+                                :key="entry._id" 
+                                class="entry-card"
+                            >
+
+                                <p>
+                                    <i class="fas fa-user"></i> 
+                                    {{ userNames[entry.userId] || 'Loading...' }}
+                                </p>
+
+                                <p>
+                                    <i class="fas fa-users"></i> 
+                                    Party Size: {{ entry.partySize }}
+                                </p>
+
+                                <p>
+                                    <i class="fas fa-map-marker-alt"></i> 
+                                    Position: #{{ entry.position }}
+                                </p>
+
+                                <p>
+                                    <i class="fas fa-hourglass-half"></i> 
+                                    Status: 
+                                    <span :class="'status-' + entry.status">
+                                        {{ entry.status }}
+                                    </span>
+                                </p>
+
+                                <div class="entry-actions">
+
+                                    <button 
+                                        @click="setReady(entry.userId, q._id)"
+                                        :disabled="entry.status === 'ready'">
+                                        <span v-if="entry.status === 'ready'">Set to Ready</span>
+                                        <span v-else>Set as Ready</span>
+                                    </button>
+
+                                    <button 
+                                        @click="q.queueType === 'takeaway' 
+                                            ? removeTakeawayUser(entry.userId, q._id) 
+                                            : removeUser(entry.userId, q._id)">
+                                        {{ q.queueType === 'takeaway' ? 'Remove Order' : 'Remove Customer' }}
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div v-else>
+                            <p>No users currently in this queue.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        
+        </div>
+
+        <script src="admin.js"></script>
+
+    </body>
+
+</html>
