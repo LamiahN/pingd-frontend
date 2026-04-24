@@ -151,6 +151,7 @@ var UGproject = new Vue({
             this.message = data.message;
             
             if (data.message === "Login successful") {
+                this.showAlert("Login Successful");
                 this.currentUser = data.user; // store user info in app state for session 
         
                 this.login = { email: '', password: '' }; // clear login fields after successful login
