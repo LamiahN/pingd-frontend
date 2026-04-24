@@ -180,17 +180,23 @@ var UGproject = new Vue({
 
             const code = prompt("Enter queue code from restaurant:");
             if (!code) return;
+
+            // updated partySize null issue
+            let parsedSize = 1; // default
         
             if (queueType === "dine-in") {
 
-                const partySize = prompt("Enter number of people:");
-            
-                if (!partySize || isNaN(partySize) || partySize <= 0) {
+                const input = prompt("Enter number of people:");
+                const size = Number(input); // convert 
+
+                if (!size || isNaN(size) || size <= 0) {
                     alert("Invalid party size");
                     return;
                 }
-            
-                this.partySize = parseInt(partySize);
+
+                parsedSize = size;        // og missing
+                this.partySize = size;
+
             
             } else {
                 this.partySize = 1; // force party size to 1 for takeaway
@@ -199,14 +205,16 @@ var UGproject = new Vue({
             this.queueCode = parseInt(code); 
         
             if (queueType === "dine-in") {
-                this.joinDineInQueue(restaurantId); // call separate function for dine-in 
+                this.joinDineInQueue(restaurantId, parsedSize); // call separate function for dine-in 
             } else {
                 this.joinTakeawayQueue(restaurantId); // call separate function for takeaway 
             }
         },
 
-        async joinDineInQueue(restaurantId) { // separate function for joining dine-in queue with party size input and validation
-            try {
+        async joinDineInQueue(restaurantId, partySize) { // separate function for joining dine-in queue with party size input and validation
+            try { // updated partySize null issue in above
+
+                console.log("Party size received in function:", partySize); // updated partySize null issue in above
 
                 const queueRes = await fetch('https://pingd-backend.onrender.com/getOrCreateQueue', { // first get or create the queue for this restaurant 
                     method: 'POST',
@@ -226,12 +234,14 @@ var UGproject = new Vue({
                     body: JSON.stringify({
                         queueId: queue._id,
                         email: this.currentUser.email,
-                        partySize: this.partySize,
+                        partySize: parseInt(partySize), // updated partySize null issue
                         queueCode: this.queueCode // pass code entered by user
                     })
                 });
         
                 const data = await res.json();
+
+                console.log("FINAL partySize being sent:", partySize); // updated partySize null issue in above
 
                 if (data.message === "Invalid queue code") {
                     alert("Invalid code. Please try again.");
@@ -437,31 +447,6 @@ var UGproject = new Vue({
                 this.acceptTableMessage = "Error accepting table";
             }
         },
-
-        /*async forceReady(queueId) { // used for testing (simulation)
-            try {
-                await fetch('http://localhost:3000/notifyCustomer', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        queueId: queueId,
-                        userId: this.currentUser._id
-                    })
-                });
-        
-                await this.fetchUserQueues();
-
-                const updatedQueue = this.userQueues.find(q => q.queueId == queueId);
-
-                // 🛑 SAFE CHECK (this prevents crash)
-                if (updatedQueue) {
-                    this.selectedQueue = updatedQueue;
-                }
-        
-            } catch (error) {
-                console.error(error);
-            }
-        },*/
         
         async waitLonger(queueId) {
             try {
