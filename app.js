@@ -51,6 +51,7 @@ var UGproject = new Vue({
         takeawaySortOption: '',
         takeawayFilter: 'all',
         takeawayCuisine: '',
+        alertMessage: "",
         faqs: [ // for FAQs page in profile section
             {
                 question: "How does Pingd work?",
@@ -79,21 +80,23 @@ var UGproject = new Vue({
         async signupUser() {
             // Empty field check
             if (!this.signup.fullName || !this.signup.email || !this.signup.password || !this.signup.dob) {
-                this.message = "Please fill in all fields";
+                //this.message = "Please fill in all fields";
+                this.showAlert("Please fill in all fields"); // alert added
                 return;
             }
         
             // Email format check
             const emailRegex = /\S+@\S+\.\S+/;
             if (!emailRegex.test(this.signup.email)) {
-                this.message = "Enter a valid email address";
+                //this.message = "Enter a valid email address";
+                this.showAlert("Enter a valid email address"); // alert added
                 return;
             }
         
             // Password length check
             if (this.signup.password.length < 6) {
                 //this.message = "Password must be at least 6 characters";
-                alert("Password must be at least 6 characters"); // alert added
+                this.showAlert("Password must be at least 6 characters"); // alert added
                 return;
             }
 
@@ -127,7 +130,7 @@ var UGproject = new Vue({
         
             // Clear fields after success
             if (data.message === "Signup successful") {
-                alert("Signup Successful!")
+                this.showAlert("Signup Successful!")
                 this.signup = { fullName: '', email: '', password: '' };
             }
         },
@@ -192,7 +195,7 @@ var UGproject = new Vue({
                 const size = Number(input); // convert 
 
                 if (!size || isNaN(size) || size <= 0) {
-                    alert("Invalid party size");
+                    this.showAlert("Invalid party size");
                     return;
                 }
 
@@ -246,15 +249,15 @@ var UGproject = new Vue({
                 console.log("FINAL partySize being sent:", partySize); // updated partySize null issue in above
 
                 if (data.message === "Invalid queue code") {
-                    alert("Invalid code. Please try again.");
+                    this.showAlert("Invalid code. Please try again.");
                     return;
                 }
                 else if (data.message === "User already in queue") {
-                    alert("You are already in this queue.");
+                    this.showAlert("You are already in this queue.");
                     return;
                 }
                 else{
-                    alert("Joined queue successfully!");
+                    this.showAlert("Joined queue successfully!");
                 }                
                 
                 console.log("Joined queue:", data);
@@ -299,15 +302,15 @@ var UGproject = new Vue({
                 const data = await res.json(); // get response data ( containing success or error msg)
         
                 if (data.message === "Invalid queue code") {
-                    alert("Invalid code. Please try again.");
+                    this.showAlert("Invalid code. Please try again.");
                     return;
                 }
                 else if (data.message === "User already in queue") {
-                    alert("You are already in this queue.");
+                    this.showAlert("You are already in this queue.");
                     return;
                 }
                 else {
-                    alert("Joined takeaway queue!");
+                    this.showAlert("Joined takeaway queue!");
                 }
         
                 await this.fetchUserQueues(); // refresh user's queues to show the new takeaway queue they just joined
@@ -548,13 +551,13 @@ var UGproject = new Vue({
         },
 
         confirmPickup(queueId) {
-            alert("Please proceed to the counter to collect your order.");
+            this.showAlert("Please proceed to the counter to collect your order.");
             this.mode = 'myQueue';
         },
 
         async handleTakeawayReady(queueId) {
 
-            alert("Your order is ready! Please proceed to the counter to collect it.");
+            this.showAlert("Your order is ready! Please proceed to the counter to collect it.");
         
             try {
                 await fetch('https://pingd-backend.onrender.com/leaveTakeawayQueue', { 
@@ -915,6 +918,14 @@ var UGproject = new Vue({
             this.faqs.forEach((f, i) => {
                 f.open = i === index ? !f.open : false;
             });
+        },
+
+        showAlert(message) {
+            this.alertMessage = message;
+        
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 2500);
         }
 
     },
