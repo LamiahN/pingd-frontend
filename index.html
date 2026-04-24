@@ -80,6 +80,9 @@
         
             <!-- MESSAGE --> <!-- change to pop up -->
             <!--<p>{{ message }}</p>-->
+            <div v-if="alertMessage" class="app-alert">
+                {{ alertMessage }}
+            </div>
 
             <!-- HOME SCREEN/ DASHBOARD--> 
             <div v-if="mode === 'home'">
