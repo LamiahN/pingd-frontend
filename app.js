@@ -93,6 +93,7 @@ var UGproject = new Vue({
             // Password length check
             if (this.signup.password.length < 6) {
                 this.message = "Password must be at least 6 characters";
+                alert("Password must be at least 6 characters"); // alert added
                 return;
             }
 
