@@ -92,7 +92,7 @@ var UGproject = new Vue({
         
             // Password length check
             if (this.signup.password.length < 6) {
-                this.message = "Password must be at least 6 characters";
+                //this.message = "Password must be at least 6 characters";
                 alert("Password must be at least 6 characters"); // alert added
                 return;
             }
@@ -127,6 +127,7 @@ var UGproject = new Vue({
         
             // Clear fields after success
             if (data.message === "Signup successful") {
+                alert("Signup Successful!")
                 this.signup = { fullName: '', email: '', password: '' };
             }
         },
